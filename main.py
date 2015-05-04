@@ -23,6 +23,7 @@ def index():
 
 @app.route('/scm/push-webhook/pusher_check/', methods=['POST'])
 def push_webhook_pusher_check():
+    # Parse event data
     try:
         push_event_data = json.loads(request.data.decode('utf-8'))
     except ValueError:
@@ -35,6 +36,9 @@ def push_webhook_pusher_check():
     # Valid pushers info
     with open(os.path.join(source_root, 'pusher_matches.json'), 'r') as f:
         pusher_matches = json.load(f)
+
+    # get SNS topic
+    sns_topic = os.environ.get('SNS_SCM_ADMIN_TOPIC', None)
 
     # Pusher info
     pusher = push_event_data.get('pusher', None)
@@ -49,7 +53,8 @@ def push_webhook_pusher_check():
     if not pusher or not repository_name or not branch:
         logger.error('Cannot parse push event data')
         logger.error(request.data)
-        sns_publish('SCM',
+        sns_publish(sns_topic=sns_topic,
+                    event='SCM',
                     subject='Failed to parse oush event data',
                     message='received data is:\n\n{}'.format(request.data.decode('utf-8')))
         return 'Bad Request, Unknown push event payload', 400
@@ -62,7 +67,8 @@ def push_webhook_pusher_check():
             if pusher in branch_to_be_matched:
                 return 'OK', 200
             else:
-                sns_publish('SCM',
+                sns_publish(sns_topic=sns_topic,
+                            event='SCM',
                             subject='Invalid push event @ {branch} of {repo}'.format(repo=repository_name,
                                                                                      branch=branch),
                             message='Pusher "{pusher}" pushed to `{branch}` branch at `{repo}` repo'.format(
