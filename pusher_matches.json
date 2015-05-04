@@ -1,0 +1,8 @@
+{
+  "tickleapp/tickle": {
+    "master": ["sodastsai", "aipeople", "Mike Chen"]
+  },
+  "tickleapp/scm-admin": {
+    "master": ["sodastsai"]
+  }
+}
