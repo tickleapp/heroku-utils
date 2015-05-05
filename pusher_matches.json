@@ -1,6 +1,6 @@
 {
   "tickleapp/tickle": {
-    "master": ["sodastsai", "aipeople", "Mike Chen"]
+    "master": ["sodastsai", "aipeople", "profmike"]
   },
   "tickleapp/heroku-utils": {
     "master": ["sodastsai"]
