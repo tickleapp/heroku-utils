@@ -13,3 +13,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from flask import request
+import hashlib
+import hmac
+
+
+class Github(object):
+
+    @staticmethod
+    def verify_webhook_signature(secret):
+        if not secret:
+            raise ValueError('Cannot get shared secret')
+
+        signature = request.headers.get('X-Hub-Signature')
+        if not signature:
+            raise ValueError('Cannot get X-Hub-Signature from header')
+
+        sha_name, signature = signature.split('=')
+        if sha_name != 'sha1':
+            raise ValueError('Unsupported hash function')
+
+        if not hmac.compare_digest(signature,
+                                   hmac.new(secret.encode('utf-8'),
+                                            msg=request.data,
+                                            digestmod=hashlib.sha1).hexdigest()):
+            raise ValueError('Invalid signature')

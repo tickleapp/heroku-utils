@@ -14,8 +14,9 @@
 # limitations under the License.
 #
 
-# import json
+import json
 import logging
+from github import Github
 import os
 import sys
 from flask import Flask, request
@@ -39,6 +40,11 @@ def index():
 
 @app.route('/scm/push-webhook/pusher_check/', methods=['POST'])
 def push_webhook_pusher_check():
+    try:
+        Github.verify_webhook_signature(secret=os.environ.get('GITHUB_WEBHOOK_SECRET', None))
+    except ValueError:
+        return 'Unauthroized, invalid hash', 401
+
     # Parse event data
     try:
         push_event_data = json.loads(request.data.decode('utf-8'))
@@ -73,7 +79,7 @@ def push_webhook_pusher_check():
                     event='SCM',
                     subject='Failed to parse oush event data',
                     message='received data is:\n\n{}'.format(request.data.decode('utf-8')))
-        return 'Bad Request, Unknown push event payload', 400
+        return 'Bad Request, unknown push event payload', 400
 
     # Match
     repo_to_be_matched = pusher_matches.get(repository_name, None)
