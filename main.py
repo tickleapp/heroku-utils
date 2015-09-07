@@ -14,14 +14,18 @@
 # limitations under the License.
 #
 
+from dotenv import load_dotenv
+from flask import Flask, request
+from github import Github
 import json
 import logging
-from github import Github
 import os
-import sys
-from flask import Flask, request
 from sns import sns_publish
+import sys
 
+dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+if os.path.exists(dotenv_path):
+    load_dotenv(dotenv_path)
 
 source_root = os.path.abspath(os.path.dirname(__file__))
 
